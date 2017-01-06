@@ -693,7 +693,14 @@ function executeTransformTest(testView: viewModule.View, androidTextFunc: (testV
 }
 
 function androidText(testView: viewModule.View) {
-    return (<android.widget.TextView>testView.android).getText();;
+    const tv = <android.widget.TextView>testView.android;
+    const transform = tv.getTransformationMethod();
+    const text = tv.getText();
+    if (transform) {
+        return transform.getTransformation(text, tv);
+    } else {
+        return text;
+    }
 }
 
 function iOSText(testView: viewModule.View) {
