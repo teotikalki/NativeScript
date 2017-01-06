@@ -14,11 +14,11 @@ import * as platform from "platform";
 import * as viewModule from "ui/core/view";
 import { Length, PercentLength } from "ui/core/view";
 
-var testBtn: buttonModule.Button;
-var testPage: page.Page;
+let testBtn: buttonModule.Button;
+let testPage: page.Page;
 
 export function setUpModule() {
-    var pageFactory = function () {
+    const pageFactory = function () {
         testPage = new page.Page();
         testBtn = new buttonModule.Button();
         testBtn.text = "test";
@@ -50,7 +50,7 @@ export function test_setting_whiteSpace_property_from_CSS_is_applied_to_Style() 
     test_property_from_CSS_is_applied_to_style("whiteSpace", "white-space", "nowrap");
 }
 
-export function test_CSS_properties_are_applied_to_Style() {
+export function test_setting_color_property_from_CSS_applied_to_Style() {
     test_property_from_CSS_is_applied_to_style("color", "color", new color.Color("#FF0000"), "#FF0000");
 }
 
@@ -75,7 +75,15 @@ export function test_setting_backgroundImage_property_from_CSS_is_applied_to_Sty
 }
 
 export function test_setting_borderWidth_property_from_CSS_is_applied_to_Style() {
-    test_property_from_CSS_is_applied_to_style("borderWidth", "border-width", 5);
+    test_property_from_CSS_is_applied_to_style("borderWidth", "border-width", { value: 5, unit: "dip" }, "5", true);
+}
+
+export function test_setting_borderWidth_dip_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("borderWidth", "border-width", { value: 5, unit: "dip" }, "5dip", true);
+}
+
+export function test_setting_borderWidth_multiple_values_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("borderWidth", "border-width", "1dip 2dip 3dip 4dip", "1 2dip 3 4dip");
 }
 
 export function test_setting_borderColor_property_from_CSS_is_applied_to_Style() {
@@ -98,21 +106,37 @@ export function test_setting_textAlignment_property_from_CSS_is_applied_to_Style
     test_property_from_CSS_is_applied_to_style("textAlignment", "text-align", "center");
 }
 
+const testLength: PercentLength = { value: 200, unit: "dip" };
 export function test_setting_width_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("width", "width", testLength, "200", true);
+}
 
-    test_property_from_CSS_is_applied_to_style("width", "width", 200);
+export function test_setting_width_dip_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("width", "width", testLength, "200dip", true);
 }
 
 export function test_setting_height_property_from_CSS_is_applied_to_Style() {
-    test_property_from_CSS_is_applied_to_style("height", "height", 200);
+    test_property_from_CSS_is_applied_to_style("height", "height", testLength, "200", true);
+}
+
+export function test_setting_height_dip_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("height", "height", testLength, "200dip", true);
 }
 
 export function test_setting_minWidth_property_from_CSS_is_applied_to_Style() {
-    test_property_from_CSS_is_applied_to_style("minWidth", "min-width", 200);
+    test_property_from_CSS_is_applied_to_style("minWidth", "min-width", testLength, "200", true);
+}
+
+export function test_setting_minWidth_dip_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("minWidth", "min-width", testLength, "200dip", true);
 }
 
 export function test_setting_minHeight_property_from_CSS_is_applied_to_Style() {
-    test_property_from_CSS_is_applied_to_style("minHeight", "min-height", 200);
+    test_property_from_CSS_is_applied_to_style("minHeight", "min-height", testLength, "200", true);
+}
+
+export function test_setting_minHeight_dip_property_from_CSS_is_applied_to_Style() {
+    test_property_from_CSS_is_applied_to_style("minHeight", "min-height", testLength, "200dip", true);
 }
 
 export function test_setting_verticalAlignment_property_from_CSS_is_applied_to_Style() {
@@ -128,7 +152,7 @@ export function test_setting_horizontalAlignment_property_from_CSS_is_applied_to
 }
 
 export function test_setting_visibility_property_from_CSS_is_applied_to_Style() {
-    test_property_from_CSS_is_applied_to_style("visibility", "visibility", "collapsed");
+    test_property_from_CSS_is_applied_to_style("visibility", "visibility", "collapse");
 }
 
 export function test_setting_opacity_property_from_CSS_is_applied_to_Style() {
@@ -151,15 +175,18 @@ export function test_setting_fontStyle_property_from_CSS_is_applied_to_Style() {
     test_property_from_CSS_is_applied_to_style("fontStyle", "font-style", "italic");
 }
 
-function test_property_from_CSS_is_applied_to_style(propName: string, cssName: string, value: any, cssValue?: string) {
+function test_property_from_CSS_is_applied_to_style(propName: string, cssName: string, value: any, cssValue?: string, useDeepEquals: boolean = false) {
     if (!cssValue) {
         cssValue = value + "";
     }
 
     testPage.css = "#testBtn { " + cssName + ": " + cssValue + " }";
 
-    TKUnit.assertEqual(testBtn.style[propName], value, "Setting property " + propName + " with CSS name " + cssName);
-
+    if (useDeepEquals) {
+        TKUnit.assertDeepEqual(testBtn.style[propName], value);
+    } else {
+        TKUnit.assertEqual(testBtn.style[propName], value, "Setting property " + propName + " with CSS name " + cssName);
+    }
     testPage.css = "";
 }
 
@@ -268,35 +295,35 @@ export function test_paddingRight_property_is_synced_in_style_and_view() {
 }
 
 export function test_visibility_property_is_synced_in_style_and_view() {
-    test_property_is_synced_in_style_and_view("visibility", "collapsed");
+    test_property_is_synced_in_style_and_view("visibility", "collapse");
 }
 
 function test_property_is_synced_in_style_and_view(propName: string, value: any) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView[propName] = value;
     TKUnit.assertEqual(testView.style[propName], value, "Setting view property " + propName + " does not set style property.");
 
-    var testView2 = new buttonModule.Button();
+    const testView2 = new buttonModule.Button();
     testView2[propName] = value;
     TKUnit.assertEqual(testView2.style[propName], value, "Setting style property " + propName + " does not set view property.");
 }
 
 function test_property_is_synced_in_style_and_layout_view(propName: string, value: any) {
-    var testView = new stackModule.StackLayout();
+    const testView = new stackModule.StackLayout();
     testView[propName] = value;
     TKUnit.assertEqual(testView.style[propName], value, "Setting view property " + propName + " does not set style property.");
 
-    var testView2 = new stackModule.StackLayout();
+    const testView2 = new stackModule.StackLayout();
     testView2[propName] = value;
     TKUnit.assertEqual(testView2.style[propName], value, "Setting style property " + propName + " does not set view property.");
 }
 
 export function test_setting_same_color_does_not_trigger_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.color = new color.Color("#FF0000");
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("colorChange", (data) => {
         changed = true;
     });
 
@@ -305,11 +332,11 @@ export function test_setting_same_color_does_not_trigger_property_change() {
 }
 
 export function test_setting_different_color_triggers_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.color = new color.Color("#FF0000");
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("colorChange", (data) => {
         changed = true;
     });
 
@@ -318,11 +345,11 @@ export function test_setting_different_color_triggers_property_change() {
 }
 
 export function test_setting_same_textDecoration_does_not_trigger_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.textDecoration = "underline";
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("textDecorationChange", (data) => {
         changed = true;
     });
 
@@ -331,11 +358,11 @@ export function test_setting_same_textDecoration_does_not_trigger_property_chang
 }
 
 export function test_setting_different_textDecoration_triggers_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.textDecoration = "underline";
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("textDecorationChange", (data) => {
         changed = true;
     });
 
@@ -344,11 +371,11 @@ export function test_setting_different_textDecoration_triggers_property_change()
 }
 
 export function test_setting_same_textTransform_does_not_trigger_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.textTransform = "uppercase";
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("textTransformChange", (data) => {
         changed = true;
     });
 
@@ -357,11 +384,11 @@ export function test_setting_same_textTransform_does_not_trigger_property_change
 }
 
 export function test_setting_different_textTransform_triggers_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.textTransform = "uppercase";
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("textTransformChange", (data) => {
         changed = true;
     });
 
@@ -370,11 +397,11 @@ export function test_setting_different_textTransform_triggers_property_change() 
 }
 
 export function test_setting_same_whiteSpace_does_not_trigger_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.whiteSpace = "normal";
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("whiteSpaceChange", (data) => {
         changed = true;
     });
 
@@ -383,11 +410,11 @@ export function test_setting_same_whiteSpace_does_not_trigger_property_change() 
 }
 
 export function test_setting_different_whiteSpace_triggers_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.whiteSpace = "normal";
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("whiteSpaceChange", (data) => {
         changed = true;
     });
 
@@ -396,11 +423,11 @@ export function test_setting_different_whiteSpace_triggers_property_change() {
 }
 
 export function test_setting_same_backgroundColor_does_not_trigger_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.backgroundColor = new color.Color("#FF0000");
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("backgroundColorChange", (data) => {
         changed = true;
     });
 
@@ -409,11 +436,11 @@ export function test_setting_same_backgroundColor_does_not_trigger_property_chan
 }
 
 export function test_setting_different_backgroundColor_triggers_property_change() {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.backgroundColor = new color.Color("#FF0000");
 
-    var changed = false;
-    testView.style.on(observable.Observable.propertyChangeEvent, (data) => {
+    let changed = false;
+    testView.style.on("backgroundColorChange", (data) => {
         changed = true;
     });
 
@@ -433,7 +460,7 @@ export function test_setting_border_color_shorthand_property_sets_all_border_col
 }
 
 function test_border_color_shorthand_property(short: string, top: color.Color, right: color.Color, bottom: color.Color, left: color.Color) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.borderColor = short;
 
     TKUnit.assertEqual(testView.style.borderTopColor, top, "top");
@@ -450,7 +477,7 @@ export function test_setting_border_width_shorthand_property_sets_all_border_wid
 }
 
 function test_border_width_shorthand_property(short: string, top: number, right: number, bottom: number, left: number) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.borderWidth = short;
 
     TKUnit.assertTrue(Length.equals(testView.style.borderTopWidth, top));
@@ -467,7 +494,7 @@ export function test_setting_border_radius_shorthand_property_sets_all_border_ra
 }
 
 function test_border_radius_shorthand_property(short: string, topLeft: number, topRight: number, bottomRight: number, bottomLeft: number) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.borderRadius = short;
 
     TKUnit.assertEqual(testView.style.borderTopLeftRadius, topLeft, "topLeft");
@@ -484,7 +511,7 @@ export function test_setting_margin_shorthand_property_sets_all_margins() {
 }
 
 function test_margin_shorthand_property(short: string, top: number, right: number, bottom: number, left: number) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.margin = short;
 
     TKUnit.assertTrue(PercentLength.equals(testView.style.marginTop, top));
@@ -501,7 +528,7 @@ export function test_setting_padding_shorthand_property_sets_all_paddings() {
 }
 
 function test_padding_shorthand_property(short: string, top: number, right: number, bottom: number, left: number) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     testView.style.padding = short;
 
     TKUnit.assertTrue(Length.equals(testView.style.paddingTop, top));
@@ -522,7 +549,7 @@ export function test_setting_font_shorthand_property() {
 }
 
 function test_font_shorthand_property(short: string, family: string, size: number, style: string, weight: string) {
-    var testView = new buttonModule.Button();
+    const testView = new buttonModule.Button();
     (<any>testView.style)["font"] = short;
 
     TKUnit.assertEqual(testView.style.fontFamily, family, "style.fontFamily");
@@ -532,7 +559,7 @@ function test_font_shorthand_property(short: string, family: string, size: numbe
 }
 export function test_setting_font_properties_sets_native_font() {
     if (fontModule.ios) {
-        var basePath = "fonts";
+        const basePath = "fonts";
         fontModule.ios.registerFont(basePath + "/Roboto-Regular.ttf");
         fontModule.ios.registerFont(basePath + "/Roboto-Bold.ttf");
         fontModule.ios.registerFont(basePath + "/Roboto-BoldItalic.ttf");
@@ -546,9 +573,9 @@ export function test_setting_font_properties_sets_native_font() {
 }
 
 function test_native_font(style: "normal" | "italic", weight: "100" | "200" | "300" | "normal" | "400" | "500" | "600" | "bold" | "700" | "800" | "900") {
-    var testView = new buttonModule.Button();
-    var fontName = "Roboto";
-    var fontNameSuffix = "";
+    const testView = new buttonModule.Button();
+    const fontName = "Roboto";
+    let fontNameSuffix = "";
 
     testView.style.fontFamily = fontName;
     testView.style.fontWeight = weight;
@@ -570,24 +597,8 @@ function test_native_font(style: "normal" | "italic", weight: "100" | "200" | "3
     //TODO: If needed add tests for other platforms
 }
 
-export function test_FontWeightsParsedAsNumbersByTheXmlParserAreConvertedToStrings() {
-    var testView = new buttonModule.Button();
-    // The XML parser will interpret "100" as a number and feed it to Style, so simulate this here.
-    (<any>testView.style).fontWeight = 100; TKUnit.assertEqual(testView.style.fontWeight, "100");
-    (<any>testView.style).fontWeight = 200; TKUnit.assertEqual(testView.style.fontWeight, "200");
-    (<any>testView.style).fontWeight = 300; TKUnit.assertEqual(testView.style.fontWeight, "300");
-    (<any>testView.style).fontWeight = 400; TKUnit.assertEqual(testView.style.fontWeight, "400");
-    (<any>testView.style).fontWeight = "normal"; TKUnit.assertEqual(testView.style.fontWeight, "normal");
-    (<any>testView.style).fontWeight = 500; TKUnit.assertEqual(testView.style.fontWeight, "500");
-    (<any>testView.style).fontWeight = 600; TKUnit.assertEqual(testView.style.fontWeight, "600");
-    (<any>testView.style).fontWeight = 700; TKUnit.assertEqual(testView.style.fontWeight, "700");
-    (<any>testView.style).fontWeight = "bold"; TKUnit.assertEqual(testView.style.fontWeight, "bold");
-    (<any>testView.style).fontWeight = 800; TKUnit.assertEqual(testView.style.fontWeight, "800");
-    (<any>testView.style).fontWeight = 900; TKUnit.assertEqual(testView.style.fontWeight, "900");
-}
-
-export var test_setting_button_whiteSpace_normal_sets_native = function () {
-    var testView = new buttonModule.Button();
+export const test_setting_button_whiteSpace_normal_sets_native = function () {
+    const testView = new buttonModule.Button();
     testView.style.whiteSpace = "nowrap";
 
     helper.buildUIAndRunTest(testView, function (views: Array<viewModule.View>) {
@@ -598,10 +609,10 @@ export var test_setting_button_whiteSpace_normal_sets_native = function () {
             TKUnit.assertEqual((<UIButton>testView.ios).titleLabel.numberOfLines, 1);
         }
     });
-}
+};
 
-export var test_setting_label_whiteSpace_normal_sets_native = function () {
-    var testView = new labelModule.Label();
+export const test_setting_label_whiteSpace_normal_sets_native = function () {
+    const testView = new labelModule.Label();
     testView.style.whiteSpace = "nowrap";
 
     helper.buildUIAndRunTest(testView, function (views: Array<viewModule.View>) {
@@ -612,10 +623,10 @@ export var test_setting_label_whiteSpace_normal_sets_native = function () {
             TKUnit.assertEqual((<UILabel>testView.ios).numberOfLines, 1);
         }
     });
-}
+};
 
-export var test_setting_button_whiteSpace_nowrap_sets_native = function () {
-    var testView = new buttonModule.Button();
+export const test_setting_button_whiteSpace_nowrap_sets_native = function () {
+    const testView = new buttonModule.Button();
     testView.style.whiteSpace = "normal";
 
     helper.buildUIAndRunTest(testView, function (views: Array<viewModule.View>) {
@@ -626,10 +637,10 @@ export var test_setting_button_whiteSpace_nowrap_sets_native = function () {
             TKUnit.assertEqual((<UIButton>testView.ios).titleLabel.numberOfLines, 0);
         }
     });
-}
+};
 
-export var test_setting_label_whiteSpace_nowrap_sets_native = function () {
-    var testView = new labelModule.Label();
+export const test_setting_label_whiteSpace_nowrap_sets_native = function () {
+    const testView = new labelModule.Label();
     testView.style.whiteSpace = "normal";
 
     helper.buildUIAndRunTest(testView, function (views: Array<viewModule.View>) {
@@ -640,12 +651,12 @@ export var test_setting_label_whiteSpace_nowrap_sets_native = function () {
             TKUnit.assertEqual((<UILabel>testView.ios).numberOfLines, 0);
         }
     });
-}
+};
 
-var initial = "text Text";
-var capitalized = "Text Text";
-var upper = "TEXT TEXT";
-var lower = "text text";
+const initial = "text Text";
+const capitalized = "Text Text";
+const upper = "TEXT TEXT";
+const lower = "text text";
 
 function executeTransformTest(testView: viewModule.View, androidTextFunc: (testView: viewModule.View) => string, iOSTextFunc: (testView: viewModule.View) => string) {
     helper.buildUIAndRunTest(testView, function (views: Array<viewModule.View>) {
@@ -689,73 +700,73 @@ function iOSText(testView: viewModule.View) {
     return (<UITextView | UILabel | UITextField>testView.ios).attributedText.string;
 }
 
-export var test_setting_label_textTransform_sets_native = function () {
-    var testView = new labelModule.Label();
+export const test_setting_label_textTransform_sets_native = function () {
+    const testView = new labelModule.Label();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
 
     executeTransformTest(testView, androidText, iOSText);
-}
+};
 
-export var test_setting_textField_textTransform_sets_native = function () {
-    var testView = new textFieldModule.TextField();
+export const test_setting_textField_textTransform_sets_native = function () {
+    const testView = new textFieldModule.TextField();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
 
     executeTransformTest(testView, androidText, iOSText);
-}
+};
 
-export var test_setting_textView_textTransform_sets_native = function () {
-    var testView = new textViewModule.TextView();
+export const test_setting_textView_textTransform_sets_native = function () {
+    const testView = new textViewModule.TextView();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
 
     executeTransformTest(testView, androidText, iOSText);
-}
+};
 
-export var test_setting_button_textTransform_sets_native = function () {
-    var testView = new buttonModule.Button();
+export const test_setting_button_textTransform_sets_native = function () {
+    const testView = new buttonModule.Button();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
 
     executeTransformTest(testView, androidText, function (v) { return (<UIButton>v.ios).titleForState(UIControlState.Normal); });
-}
+};
 
-export var test_setting_label_textTransform_and_textDecoration_sets_native = function () {
-    var testView = new labelModule.Label();
+export const test_setting_label_textTransform_and_textDecoration_sets_native = function () {
+    const testView = new labelModule.Label();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
     testView.style.textDecoration = "underline";
 
     executeTransformTest(testView, androidText, iOSText);
-}
+};
 
-export var test_setting_textField_textTransform_and_textDecoration_sets_native = function () {
-    var testView = new textFieldModule.TextField();
+export const test_setting_textField_textTransform_and_textDecoration_sets_native = function () {
+    const testView = new textFieldModule.TextField();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
     testView.style.textDecoration = "underline";
 
     executeTransformTest(testView, androidText, iOSText);
-}
+};
 
-export var test_setting_textView_textTransform_and_textDecoration_sets_native = function () {
-    var testView = new textViewModule.TextView();
+export const test_setting_textView_textTransform_and_textDecoration_sets_native = function () {
+    const testView = new textViewModule.TextView();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
     testView.style.textDecoration = "underline";
 
     executeTransformTest(testView, androidText, iOSText);
-}
+};
 
-export var test_setting_button_textTransform_and_textDecoration_sets_native = function () {
-    var testView = new buttonModule.Button();
+export const test_setting_button_textTransform_and_textDecoration_sets_native = function () {
+    const testView = new buttonModule.Button();
     testView.text = initial;
     testView.style.textTransform = "capitalize";
     testView.style.textDecoration = "underline";
 
     executeTransformTest(testView, androidText, function (v) { return (<UIButton>v.ios).attributedTitleForState(UIControlState.Normal).string; });
-}
+};
 
 export function test_border_color() {
     let testView = new buttonModule.Button();
@@ -767,7 +778,7 @@ export function test_border_color() {
     TKUnit.assertEqual(testView.style.borderRightColor, red, "right");
     TKUnit.assertEqual(testView.style.borderBottomColor, red, "bottom");
     TKUnit.assertEqual(testView.style.borderLeftColor, red, "left");
-    
+
     let blue = new color.Color("blue");
     let hex = blue.hex;
     testView.style.borderColor = hex;
@@ -780,7 +791,7 @@ export function test_border_color() {
 
 export function test_border_width() {
     let testView = new buttonModule.Button();
-    
+
     testView.style.borderWidth = 10;
     TKUnit.assertEqual(testView.style.borderWidth, 10, "all");
 
@@ -790,7 +801,7 @@ export function test_border_width() {
     TKUnit.assertTrue(Length.equals(testView.style.borderLeftWidth, { value: 10, unit: "dip" }));
 
     testView.style.borderWidth = "20";
-    TKUnit.assertEqual((<any>testView.style.borderWidth), 20, "all");
+    TKUnit.assert(Length.equals(<any>testView.style.borderWidth, { value: 20, unit: "dip" }), "all");
 
     TKUnit.assertTrue(Length.equals(testView.style.borderTopWidth, { value: 20, unit: "dip" }));
     TKUnit.assertTrue(Length.equals(testView.style.borderRightWidth, { value: 20, unit: "dip" }));
@@ -800,14 +811,14 @@ export function test_border_width() {
 
 export function test_border_radius() {
     let testView = new buttonModule.Button();
-    
+
     testView.style.borderRadius = 10;
     TKUnit.assertEqual(testView.style.borderRadius, 10, "all");
     TKUnit.assertEqual(testView.style.borderTopLeftRadius, 10, "top");
     TKUnit.assertEqual(testView.style.borderTopRightRadius, 10, "right");
     TKUnit.assertEqual(testView.style.borderBottomRightRadius, 10, "bottom");
     TKUnit.assertEqual(testView.style.borderBottomLeftRadius, 10, "left");
-    
+
     testView.style.borderRadius = "20";
     TKUnit.assertEqual((<any>testView.style.borderRadius), 20, "all");
     TKUnit.assertEqual(testView.style.borderTopLeftRadius, 20, "top");
